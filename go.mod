@@ -1,4 +1,4 @@
-module github.com/paketo-buildpacks/clojure
+module github.com/paketo-buildpacks/clojure-tools
 
 go 1.15
 
