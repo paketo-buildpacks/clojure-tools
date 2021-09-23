@@ -24,8 +24,8 @@ The buildpack will do the following:
 ## Configuration
 | Environment Variable | Description
 | -------------------- | -----------
-| `$BP_TOOLS_BUILD_ARGUMENTS` | Configure the arguments to pass to build system.  Defaults to `-T:build uber`.
-| `$BP_DEPS_ARGUMENTS` | Configure the arguments to pass to build system.  Defaults to `-X:uberjar`.
-| `$BP_CLOJURE_BUILT_MODULE` | Configure the module to find application artifact in.  Defaults to the root module (empty).
-| `$BP_CLOJURE_BUILT_ARTIFACT` | Configure the built application artifact explicitly.  Supersedes `$BP_CLOJURE_BUILT_MODULE`  Defaults to `target/*.jar`.
+| `$BP_CLJ_TOOLS_BUILD_ARGUMENTS` | Configure the arguments to pass to build system.  Defaults to `-T:build uber`.
+| `$BP_CLJ_DEPS_ARGUMENTS` | Configure the arguments to pass to build system.  Defaults to `-X:uberjar`.
+| `$BP_CLJ_BUILT_MODULE` | Configure the module to find application artifact in.  Defaults to the root module (empty).
+| `$BP_CLJ_BUILT_ARTIFACT` | Configure the built application artifact explicitly.  Supersedes `$BP_CLJ_BUILT_MODULE`  Defaults to `target/*.jar`.
 

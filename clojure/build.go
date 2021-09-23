@@ -90,21 +90,21 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	var args []string
 	if fileExists(filepath.Join(context.Application.Path, "build.clj")) {
-		args, err = libbs.ResolveArguments("BP_TOOLS_BUILD_ARGUMENTS", cr)
+		args, err = libbs.ResolveArguments("BP_CLJ_TOOLS_BUILD_ARGUMENTS", cr)
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to resolve build arguments\n%w", err)
 		}
 	} else if fileExists(filepath.Join(context.Application.Path, "deps.edn")) {
-		args, err = libbs.ResolveArguments("BP_DEPS_ARGUMENTS", cr)
+		args, err = libbs.ResolveArguments("BP_CLJ_DEPS_ARGUMENTS", cr)
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to resolve build arguments\n%w", err)
 		}
 	}
 
 	art := libbs.ArtifactResolver{
-		ArtifactConfigurationKey: "BP_CLOJURE_BUILT_ARTIFACT",
+		ArtifactConfigurationKey: "BP_CLJ_BUILT_ARTIFACT",
 		ConfigurationResolver:    cr,
-		ModuleConfigurationKey:   "BP_CLOJURE_BUILT_MODULE",
+		ModuleConfigurationKey:   "BP_CLJ_BUILT_MODULE",
 		InterestingFileDetector:  libbs.AlwaysInterestingFileDetector{},
 	}
 

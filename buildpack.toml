@@ -36,25 +36,25 @@ id = "io.paketo.stacks.tiny"
 id = "org.cloudfoundry.stacks.cflinuxfs3"
 
 [[metadata.configurations]]
-name        = "BP_DEPS_ARGUMENTS"
+name        = "BP_CLJ_DEPS_ARGUMENTS"
 description = "the arguments to pass to Clojure"
 default     = "-X:uberjar"
 build       = true
 
 [[metadata.configurations]]
-name        = "BP_TOOLS_BUILD_ARGUMENTS"
+name        = "BP_CLJ_TOOLS_BUILD_ARGUMENTS"
 description = "the arguments to pass to Tools Build"
 default     = "-T:build uber"
 build       = true
 
 [[metadata.configurations]]
-name        = "BP_CLOJURE_BUILT_ARTIFACT"
-description = "the built application artifact explicitly.  Supersedes $BP_CLOJURE_BUILT_MODULE"
+name        = "BP_CLJ_BUILT_ARTIFACT"
+description = "the built application artifact explicitly. Supersedes $BP_CLJ_BUILT_MODULE"
 default     = "target/*.jar"
 build       = true
 
 [[metadata.configurations]]
-name        = "BP_CLOJURE_BUILT_MODULE"
+name        = "BP_CLJ_BUILT_MODULE"
 description = "the module to find application artifact in"
 build       = true
 
