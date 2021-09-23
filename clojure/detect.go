@@ -33,35 +33,28 @@ const (
 type Detect struct{}
 
 func (Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
-	files := []string{
-		filepath.Join(context.Application.Path, "deps.edn"),
-		filepath.Join(context.Application.Path, "build.clj"),
+	file := filepath.Join(context.Application.Path, "deps.edn")
+
+	_, err := os.Stat(file)
+	if os.IsNotExist(err) {
+		return libcnb.DetectResult{Pass: false}, nil
+	} else if err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("unable to determine if %s exists\n%w", file, err)
 	}
 
-	for _, file := range files {
-		_, err := os.Stat(file)
-		if os.IsNotExist(err) {
-			continue
-		} else if err != nil {
-			return libcnb.DetectResult{}, fmt.Errorf("unable to determine if %s exists\n%w", file, err)
-		}
-
-		return libcnb.DetectResult{
-			Pass: true,
-			Plans: []libcnb.BuildPlan{
-				{
-					Provides: []libcnb.BuildPlanProvide{
-						{Name: PlanEntryClj},
-						{Name: PlanEntryJVMApplicationPackage},
-					},
-					Requires: []libcnb.BuildPlanRequire{
-						{Name: PlanEntryClj},
-						{Name: PlanEntryJDK},
-					},
+	return libcnb.DetectResult{
+		Pass: true,
+		Plans: []libcnb.BuildPlan{
+			{
+				Provides: []libcnb.BuildPlanProvide{
+					{Name: PlanEntryClj},
+					{Name: PlanEntryJVMApplicationPackage},
+				},
+				Requires: []libcnb.BuildPlanRequire{
+					{Name: PlanEntryClj},
+					{Name: PlanEntryJDK},
 				},
 			},
-		}, nil
-	}
-
-	return libcnb.DetectResult{Pass: false}, nil
+		},
+	}, nil
 }
