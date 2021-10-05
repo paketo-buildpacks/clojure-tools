@@ -71,28 +71,4 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			},
 		}))
 	})
-
-	it("fails without build.clj", func() {
-		Expect(detect.Detect(ctx)).To(Equal(libcnb.DetectResult{}))
-	})
-
-	it("passes with build.clj", func() {
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "build.clj"), []byte{}, 0644))
-
-		Expect(detect.Detect(ctx)).To(Equal(libcnb.DetectResult{
-			Pass: true,
-			Plans: []libcnb.BuildPlan{
-				{
-					Provides: []libcnb.BuildPlanProvide{
-						{Name: "clojure"},
-						{Name: "jvm-application-package"},
-					},
-					Requires: []libcnb.BuildPlanRequire{
-						{Name: "clojure"},
-						{Name: "jdk"},
-					},
-				},
-			},
-		}))
-	})
 }

@@ -42,6 +42,12 @@ default     = "-X:uberjar"
 build       = true
 
 [[metadata.configurations]]
+name        = "BP_CLJ_TOOLS_BUILD_ENABLED"
+description = "the arguments to enable Tools Build"
+default     = "false"
+build       = true
+
+[[metadata.configurations]]
 name        = "BP_CLJ_TOOLS_BUILD_ARGUMENTS"
 description = "the arguments to pass to Tools Build"
 default     = "-T:build uber"

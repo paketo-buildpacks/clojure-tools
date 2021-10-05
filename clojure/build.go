@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libbs"
@@ -88,13 +89,15 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	c.Logger = b.Logger
 	result.Layers = append(result.Layers, c)
 
+	ednFileExists := fileExists(filepath.Join(context.Application.Path, "deps.edn"))
+	toolsBuildEnabled, err := libbs.ResolveArguments("BP_CLJ_TOOLS_BUILD_ENABLED", cr)
 	var args []string
-	if fileExists(filepath.Join(context.Application.Path, "build.clj")) {
+	if ednFileExists && strings.ToLower(toolsBuildEnabled[0]) == "true" {
 		args, err = libbs.ResolveArguments("BP_CLJ_TOOLS_BUILD_ARGUMENTS", cr)
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to resolve build arguments\n%w", err)
 		}
-	} else if fileExists(filepath.Join(context.Application.Path, "deps.edn")) {
+	} else if ednFileExists {
 		args, err = libbs.ResolveArguments("BP_CLJ_DEPS_ARGUMENTS", cr)
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to resolve build arguments\n%w", err)
