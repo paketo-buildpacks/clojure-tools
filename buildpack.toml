@@ -72,6 +72,10 @@ uri    = "https://download.clojure.org/install/linux-install-1.10.3.943.sh"
 sha256 = "f1fdb786fa8b9ef3a08d0b331a51861cd5a6eea277e93bbad64bf37774df17c6"
 stacks  = [ "io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "org.cloudfoundry.stacks.cflinuxfs3" ]
 
+  [[metadata.dependencies.licenses]]
+  type = "Eclipse Public License - v 1.0"
+  uri  = "https://github.com/clojure/clojure/blob/master/epl-v10.html"
+
 [metadata]
 pre-package   = "scripts/build.sh"
 include-files = [
