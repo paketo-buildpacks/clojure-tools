@@ -68,8 +68,8 @@ build       = true
 id      = "clojure"
 name    = "Clojure"
 version = "1.10.3"
-uri    = "https://download.clojure.org/install/linux-install-1.10.3.943.sh"
-sha256 = "f1fdb786fa8b9ef3a08d0b331a51861cd5a6eea277e93bbad64bf37774df17c6"
+uri    = "https://download.clojure.org/install/linux-install-1.10.3.986.sh"
+sha256 = "f2a271d6892fb04f7377148f6770185486ca194245721ab34a62ae03e8d1149f"
 stacks  = [ "io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "org.cloudfoundry.stacks.cflinuxfs3" ]
 
   [[metadata.dependencies.licenses]]
