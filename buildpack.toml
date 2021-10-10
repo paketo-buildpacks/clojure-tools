@@ -63,7 +63,7 @@ api = "0.6"
     id = "clojure"
     name = "Clojure"
     sha256 = "f2a271d6892fb04f7377148f6770185486ca194245721ab34a62ae03e8d1149f"
-    stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "org.cloudfoundry.stacks.cflinuxfs3"]
+    stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
     uri = "https://download.clojure.org/install/linux-install-1.10.3.986.sh"
     version = "1.10.3"
 
@@ -78,4 +78,4 @@ api = "0.6"
   id = "io.paketo.stacks.tiny"
 
 [[stacks]]
-  id = "org.cloudfoundry.stacks.cflinuxfs3"
+  id = "*"
