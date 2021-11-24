@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-api = "0.6"
+api = "0.7"
 
 [buildpack]
   description = "A Cloud Native Buildpack that builds Clojure applications from source"
@@ -21,6 +21,7 @@ api = "0.6"
   keywords = ["java", "clojure", "build-system"]
   name = "Paketo Clojure Tools Buildpack"
   version = "{{.version}}"
+  sbom-formats = ["application/vnd.syft+json", "application/vnd.cyclonedx+json"]
 
   [[buildpack.licenses]]
     type = "Apache-2.0"
@@ -66,6 +67,10 @@ api = "0.6"
     stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
     uri = "https://download.clojure.org/install/linux-install-1.10.3.1029.sh"
     version = "1.10.3"
+    purl = "pkg:generic/clojure@1.10.3?arch=amd64"
+    cpes = [
+      "cpe:2.3:a:cognitect:clojure:1.10.3:*:*:*:*:*:*:*"
+    ]
 
     [[metadata.dependencies.licenses]]
       type = "Eclipse Public License - v 1.0"
