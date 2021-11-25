@@ -20,8 +20,8 @@ api = "0.7"
   id = "paketo-buildpacks/clojure-tools"
   keywords = ["java", "clojure", "build-system"]
   name = "Paketo Clojure Tools Buildpack"
-  version = "{{.version}}"
   sbom-formats = ["application/vnd.syft+json", "application/vnd.cyclonedx+json"]
+  version = "{{.version}}"
 
   [[buildpack.licenses]]
     type = "Apache-2.0"
@@ -61,16 +61,14 @@ api = "0.7"
     name = "BP_CLJ_BUILT_MODULE"
 
   [[metadata.dependencies]]
+    cpes = ["cpe:2.3:a:cognitect:clojure:1.10.3:*:*:*:*:*:*:*"]
     id = "clojure"
     name = "Clojure"
+    purl = "pkg:generic/clojure@1.10.3?arch=amd64"
     sha256 = "fe495d448a8c4565bb37f04481f6231575114a3d918cadb93be6770f43863ad4"
     stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
     uri = "https://download.clojure.org/install/linux-install-1.10.3.1029.sh"
     version = "1.10.3"
-    purl = "pkg:generic/clojure@1.10.3?arch=amd64"
-    cpes = [
-      "cpe:2.3:a:cognitect:clojure:1.10.3:*:*:*:*:*:*:*"
-    ]
 
     [[metadata.dependencies.licenses]]
       type = "Eclipse Public License - v 1.0"
