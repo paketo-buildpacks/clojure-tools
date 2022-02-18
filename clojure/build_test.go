@@ -29,7 +29,7 @@ import (
 	"github.com/paketo-buildpacks/libbs"
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/clojure-tools/clojure"
+	"github.com/paketo-buildpacks/clojure-tools/v2/clojure"
 )
 
 func testBuild(t *testing.T, context spec.G, it spec.S) {
