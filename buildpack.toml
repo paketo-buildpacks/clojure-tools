@@ -61,14 +61,14 @@ api = "0.7"
     name = "BP_CLJ_BUILT_MODULE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:cognitect:clojure:1.10.3:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:cognitect:clojure:1.11.0:*:*:*:*:*:*:*"]
     id = "clojure"
     name = "Clojure"
-    purl = "pkg:generic/clojure@1.10.3?arch=amd64"
-    sha256 = "fd3d465ac30095157ce754f1551b840008a6e3503ce5023d042d0490f7bafb98"
+    purl = "pkg:generic/clojure@1.11.0?arch=amd64"
+    sha256 = "a71bd520bd43d4be6e0cab0c525f5d1f85911fc276f3d0f37f00243fb0f1e594"
     stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
-    uri = "https://download.clojure.org/install/linux-install-1.10.3.1087.sh"
-    version = "1.10.3"
+    uri = "https://download.clojure.org/install/linux-install-1.11.0.1100.sh"
+    version = "1.11.0"
 
     [[metadata.dependencies.licenses]]
       type = "Eclipse Public License - v 1.0"
