@@ -65,9 +65,9 @@ api = "0.7"
     id = "clojure"
     name = "Clojure"
     purl = "pkg:generic/clojure@1.11.1?arch=amd64"
-    sha256 = "2ba0de34f122f26580e3e6337bd04c8e3f9f648299367b17da85f00d930e191c"
+    sha256 = "9aadc1a1840a458517a6efb111eba72be93c17bbdc874c833ef781e77aacc55e"
     stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
-    uri = "https://download.clojure.org/install/linux-install-1.11.1.1139.sh"
+    uri = "https://download.clojure.org/install/linux-install-1.11.1.1149.sh"
     version = "1.11.1"
 
     [[metadata.dependencies.licenses]]
