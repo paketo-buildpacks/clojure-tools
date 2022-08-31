@@ -1,6 +1,6 @@
 # `gcr.io/paketo-buildpacks/clojure-tools`
 
-The Paketo Clojure Tools Buildpack is a Cloud Native Buildpack that builds Clojure-based applications from source.
+The Paketo Buildpack for Clojure Tools is a Cloud Native Buildpack that builds Clojure-based applications from source.
 
 ## Behavior
 

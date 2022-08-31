@@ -19,7 +19,7 @@ api = "0.7"
   homepage = "https://github.com/paketo-buildpacks/clojure-tools"
   id = "paketo-buildpacks/clojure-tools"
   keywords = ["java", "clojure", "build-system"]
-  name = "Paketo Clojure Tools Buildpack"
+  name = "Paketo Buildpack for Clojure Tools"
   sbom-formats = ["application/vnd.syft+json", "application/vnd.cyclonedx+json"]
   version = "{{.version}}"
 
