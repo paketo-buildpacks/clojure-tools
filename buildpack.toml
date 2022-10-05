@@ -60,6 +60,18 @@ api = "0.7"
     description = "the module to find application artifact in"
     name = "BP_CLJ_BUILT_MODULE"
 
+  [[metadata.configurations]]
+    build = true
+    default = ""
+    description = "colon separated list of glob patterns, matched source files are included"
+    name = "BP_INCLUDE_FILES"
+
+  [[metadata.configurations]]
+    build = true
+    default = ""
+    description = "colon separated list of glob patterns, matched source files are removed"
+    name = "BP_EXCLUDE_FILES"
+
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:cognitect:clojure:1.11.1:*:*:*:*:*:*:*"]
     id = "clojure"
