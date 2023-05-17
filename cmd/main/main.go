@@ -27,10 +27,11 @@ import (
 )
 
 func main() {
+	logger := bard.NewLogger(os.Stdout)
 	libpak.Main(
-		clojure.Detect{},
+		clojure.Detect{Logger: logger},
 		clojure.Build{
-			Logger:             bard.NewLogger(os.Stdout),
+			Logger:             logger,
 			ApplicationFactory: libbs.NewApplicationFactory(),
 		},
 	)

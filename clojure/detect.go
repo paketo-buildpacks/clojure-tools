@@ -20,8 +20,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
+	
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/libpak/bard"
 )
 
 const (
@@ -31,13 +32,16 @@ const (
 	PlanEntrySyft                  = "syft"
 )
 
-type Detect struct{}
+type Detect struct{
+	Logger bard.Logger
+}
 
-func (Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
+func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
 	file := filepath.Join(context.Application.Path, "deps.edn")
 
 	_, err := os.Stat(file)
 	if os.IsNotExist(err) {
+		d.Logger.Info("SKIPPED: no 'deps.edn' file found in the application path")
 		return libcnb.DetectResult{Pass: false}, nil
 	} else if err != nil {
 		return libcnb.DetectResult{}, fmt.Errorf("unable to determine if %s exists\n%w", file, err)
