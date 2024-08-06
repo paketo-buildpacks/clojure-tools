@@ -73,16 +73,16 @@ api = "0.7"
     name = "BP_EXCLUDE_FILES"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:cognitect:clojure:1.11.3:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:cognitect:clojure:1.11.4:*:*:*:*:*:*:*"]
     id = "clojure"
     name = "Clojure"
-    purl = "pkg:generic/clojure@1.11.3?arch=amd64"
-    sha256 = "0c41063a2fefb53a31bc1bc236899955f759c5103dc0495489cdd74bf8f114bb"
-    source = "https://github.com/clojure/clojure/archive/refs/tags/clojure-1.11.3.tar.gz"
-    source-sha256 = "0ae8327335fd48125263acc85d388ac81ddc0cdbb872e0f6743e0dffd904a1d2"
+    purl = "pkg:generic/clojure@1.11.4?arch=amd64"
+    sha256 = "b23a784c048e4a5b1fc4bcddaea07abcf476621a97d98bbf4f4726c3375d6e98"
+    source = "https://github.com/clojure/clojure/archive/refs/tags/clojure-1.11.4.tar.gz"
+    source-sha256 = "c2a875549d27c8f0e9d1e7d2f3272c2704500f62de2fb26a99603b0d56989485"
     stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
-    uri = "https://download.clojure.org/install/linux-install-1.11.3.1463.sh"
-    version = "1.11.3"
+    uri = "https://download.clojure.org/install/linux-install-1.11.4.1474.sh"
+    version = "1.11.4"
 
     [[metadata.dependencies.licenses]]
       type = "Eclipse Public License - v 1.0"
