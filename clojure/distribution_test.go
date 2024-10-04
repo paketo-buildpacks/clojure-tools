@@ -17,7 +17,6 @@
 package clojure_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +41,7 @@ func testDistribution(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(err).NotTo(HaveOccurred())
 
-		ctx.Layers.Path, err = ioutil.TempDir("", "distribution-layers")
+		ctx.Layers.Path, err = os.MkdirTemp("", "distribution-layers")
 		Expect(err).NotTo(HaveOccurred())
 	})
 
