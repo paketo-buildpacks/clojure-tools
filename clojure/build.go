@@ -93,7 +93,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	result.Layers = append(result.Layers, c)
 
 	ednFileExists := fileExists(filepath.Join(context.Application.Path, "deps.edn"))
-	toolsBuildEnabled, err := libbs.ResolveArguments("BP_CLJ_TOOLS_BUILD_ENABLED", cr)
+	toolsBuildEnabled, _ := libbs.ResolveArguments("BP_CLJ_TOOLS_BUILD_ENABLED", cr)
 	var args []string
 	if ednFileExists && strings.ToLower(toolsBuildEnabled[0]) == "true" {
 		args, err = libbs.ResolveArguments("BP_CLJ_TOOLS_BUILD_ARGUMENTS", cr)
@@ -114,7 +114,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		InterestingFileDetector:  libbs.AlwaysInterestingFileDetector{},
 	}
 
-	sbomScanner := sbom.NewSyftCLISBOMScanner(context.Layers, effect.NewExecutor(), b.Logger)
+	sbomScanner := sbom.NewSyftCLISBOMScanner(context.Layers, effect.CommandExecutor{}, b.Logger)
 
 	a, err := b.ApplicationFactory.NewApplication(
 		map[string]interface{}{},
