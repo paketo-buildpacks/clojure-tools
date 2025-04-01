@@ -1,4 +1,7 @@
-# `gcr.io/paketo-buildpacks/clojure-tools`
+# Paketo Buildpack for Clojure Tools
+
+## Buildpack ID: `paketo-buildpacks/clojure-tools`
+## Registry URLs: `docker.io/paketobuildpacks/clojure-tools`
 
 The Paketo Buildpack for Clojure Tools is a Cloud Native Buildpack that builds Clojure-based applications from source.
 
