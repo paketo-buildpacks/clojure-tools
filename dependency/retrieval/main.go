@@ -15,232 +15,144 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"regexp"
-	"sort"
 	"strings"
 
-	"github.com/BurntSushi/toml"
 	"github.com/Masterminds/semver/v3"
+	"github.com/paketo-buildpacks/libdependency/retrieve"
+	"github.com/paketo-buildpacks/libdependency/upstream"
+	"github.com/paketo-buildpacks/libdependency/versionology"
 	"github.com/paketo-buildpacks/packit/v2/cargo"
 )
 
-var httpClient = &http.Client{}
+const (
+	id   = "clojure"
+	name = "Clojure"
+
+	org  = "clojure"
+	repo = "brew-install"
+)
+
+var versionPattern = regexp.MustCompile(`^(\d+)\.(\d+)\.(\d+)$`)
+
+type clojureVersion struct {
+	version *semver.Version
+	branch  string
+}
+
+func (v clojureVersion) Version() *semver.Version {
+	return v.version
+}
 
 func main() {
-	var buildpackTomlPath, outputPath string
-	flag.StringVar(&buildpackTomlPath, "buildpack-toml-path", "", "Path to buildpack.toml")
-	flag.StringVar(&outputPath, "output", "", "Path to output metadata.json")
-	flag.Parse()
+	retrieve.NewMetadata(id, getAllVersions, generateMetadata)
+}
 
-	if buildpackTomlPath == "" || outputPath == "" {
-		fmt.Fprintf(os.Stderr, "Usage: %s --buildpack-toml-path <path> --output <path>\n", os.Args[0])
-		os.Exit(1)
-	}
-
-	// Load buildpack.toml
-	file, err := os.Open(buildpackTomlPath)
+func getAllVersions() (versionology.VersionFetcherArray, error) {
+	branches, err := fetchBranches(org, repo)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error opening buildpack.toml: %v\n", err)
-		os.Exit(1)
-	}
-	defer file.Close()
-
-	var config cargo.Config
-	if _, err := toml.NewDecoder(file).Decode(&config); err != nil {
-		fmt.Fprintf(os.Stderr, "Error parsing buildpack.toml: %v\n", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("unable to fetch branches\n%w", err)
 	}
 
-	// Get constraints for clojure
-	var constraints []cargo.ConfigMetadataDependencyConstraint
-	for _, c := range config.Metadata.DependencyConstraints {
-		if c.ID == "clojure" {
-			constraints = append(constraints, c)
-		}
-	}
-
-	// Get maximum existing version
-	var maxExistingVersion *semver.Version
-	for _, dep := range config.Metadata.Dependencies {
-		if dep.ID == "clojure" {
-			v, err := semver.NewVersion(dep.Version)
-			if err == nil {
-				if maxExistingVersion == nil || v.GreaterThan(maxExistingVersion) {
-					maxExistingVersion = v
-				}
-			}
-		}
-	}
-
-	// Fetch version branches from the brew tap repo. Each Clojure release has
-	// a branch named after its version (e.g. 1.12.6) whose stable.properties
-	// file pins the installer version (e.g. 1.12.6.1673).
-	branches, err := fetchBranches("clojure", "brew-install")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error fetching branches: %v\n", err)
-		os.Exit(1)
-	}
-
-	type candidate struct {
-		branch  string
-		version *semver.Version
-	}
-	var candidates []candidate
-	versionPattern := regexp.MustCompile(`^(\d+)\.(\d+)\.(\d+)$`)
+	var versions versionology.VersionFetcherArray
 	for _, branch := range branches {
 		if !versionPattern.MatchString(branch) {
 			continue
 		}
+
 		v, err := semver.NewVersion(branch)
 		if err != nil {
 			fmt.Printf("Skipping %s: unable to parse version\n", branch)
 			continue
 		}
-		if maxExistingVersion != nil && !v.GreaterThan(maxExistingVersion) {
-			fmt.Printf("Skipping %s: not newer than max existing version %s\n", v.String(), maxExistingVersion.String())
-			continue
-		}
-		if !matchesConstraints(v, constraints) {
-			continue
-		}
-		candidates = append(candidates, candidate{branch: branch, version: v})
+
+		versions = append(versions, clojureVersion{version: v, branch: branch})
 	}
 
-	sort.Slice(candidates, func(i, j int) bool {
-		return candidates[i].version.LessThan(candidates[j].version)
-	})
+	return versions, nil
+}
 
-	var output []OutputMetadata
+func generateMetadata(versionFetcher versionology.VersionFetcher) ([]versionology.Dependency, error) {
+	version, ok := versionFetcher.(clojureVersion)
+	if !ok {
+		return nil, fmt.Errorf("unexpected version type %T", versionFetcher)
+	}
 
-	for _, c := range candidates {
-		versionStr := c.version.String()
+	versionString := version.version.String()
 
-		// The stable.properties file on the version branch pins the installer
-		// version (e.g. 1.12.6.1673) for a given Clojure version
-		installerVersion, err := fetchStableVersion(c.branch)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: skipping %s: %v\n", versionStr, err)
-			continue
-		}
+	installerVersion, err := fetchStableVersion(version.branch)
+	if err != nil {
+		return nil, fmt.Errorf("unable to fetch stable version for %s\n%w", versionString, err)
+	}
 
-		if !strings.HasPrefix(installerVersion, versionStr+".") {
-			fmt.Fprintf(os.Stderr, "Warning: skipping %s: stable installer version %s does not match\n", versionStr, installerVersion)
-			continue
-		}
+	if !strings.HasPrefix(installerVersion, versionString+".") {
+		fmt.Printf("Skipping %s: stable installer version %s does not match\n", versionString, installerVersion)
+		return nil, nil
+	}
 
-		uri := fmt.Sprintf("https://download.clojure.org/install/linux-install-%s.sh", installerVersion)
+	uri := fmt.Sprintf("https://download.clojure.org/install/linux-install-%s.sh", installerVersion)
+	checksum, err := upstream.GetSHA256OfRemoteFile(uri)
+	if err != nil {
+		return nil, fmt.Errorf("unable to checksum %s\n%w", uri, err)
+	}
 
-		// Compute checksums
-		fmt.Printf("Processing version %s...\n", versionStr)
-		checksum, err := computeChecksum(uri)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: failed to checksum uri for %s: %v\n", versionStr, err)
-			continue
-		}
+	source := fmt.Sprintf("https://github.com/clojure/clojure/archive/refs/tags/clojure-%s.tar.gz", version.branch)
+	sourceChecksum, err := upstream.GetSHA256OfRemoteFile(source)
+	if err != nil {
+		return nil, fmt.Errorf("unable to checksum %s\n%w", source, err)
+	}
 
-		sourceURL := fmt.Sprintf("https://github.com/clojure/clojure/archive/refs/tags/clojure-%s.tar.gz", c.branch)
-		sourceChecksum, err := computeChecksum(sourceURL)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: failed to checksum source for %s: %v\n", versionStr, err)
-			continue
-		}
-
-		cpe := fmt.Sprintf("cpe:2.3:a:cognitect:clojure:%s:*:*:*:*:*:*:*", versionStr)
-		purl := fmt.Sprintf("pkg:generic/clojure@%s?arch=amd64", versionStr)
-
-		licenses := []map[string]string{
-			{
+	dependency := cargo.ConfigMetadataDependency{
+		Checksum: fmt.Sprintf("sha256:%s", checksum),
+		CPE:      fmt.Sprintf("cpe:2.3:a:cognitect:clojure:%s:*:*:*:*:*:*:*", versionString),
+		ID:       id,
+		Licenses: []interface{}{
+			map[string]string{
 				"type": "Eclipse Public License - v 1.0",
 				"uri":  "https://github.com/clojure/clojure/blob/master/epl-v10.html",
 			},
-		}
-
-		output = append(output, OutputMetadata{
-			ID:             "clojure",
-			Name:           "Clojure",
-			Version:        versionStr,
-			URI:            uri,
-			Checksum:       "sha256:" + checksum,
-			Source:         sourceURL,
-			SourceChecksum: "sha256:" + sourceChecksum,
-			CPE:            cpe,
-			PURL:           purl,
-			Licenses:       licenses,
-			Stacks:         []string{"io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"},
-		})
+		},
+		Name:           name,
+		PURL:           retrieve.GeneratePURL(id, versionString, checksum, uri),
+		Source:         source,
+		SourceChecksum: fmt.Sprintf("sha256:%s", sourceChecksum),
+		Stacks:         []string{"io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"},
+		URI:            uri,
+		Version:        versionString,
 	}
 
-	// Write output
-	outFile, err := os.Create(outputPath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating output file: %v\n", err)
-		os.Exit(1)
-	}
-	defer outFile.Close()
-
-	encoder := json.NewEncoder(outFile)
-	encoder.SetIndent("", "  ")
-	if err = encoder.Encode(output); err != nil {
-		fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Printf("Successfully wrote %d dependency entries to %s\n", len(output), outputPath)
+	return versionology.NewDependencyArray(dependency, "")
 }
 
-type OutputMetadata struct {
-	ID             string              `json:"id"`
-	Name           string              `json:"name"`
-	Version        string              `json:"version"`
-	URI            string              `json:"uri"`
-	Checksum       string              `json:"checksum"`
-	Source         string              `json:"source,omitempty"`
-	SourceChecksum string              `json:"source-checksum,omitempty"`
-	CPE            string              `json:"cpe,omitempty"`
-	PURL           string              `json:"purl,omitempty"`
-	Licenses       []map[string]string `json:"licenses,omitempty"`
-	Stacks         []string            `json:"stacks,omitempty"`
-}
-
-type GitHubBranch struct {
+type githubBranch struct {
 	Name string `json:"name"`
 }
 
 func fetchBranches(owner, repo string) ([]string, error) {
 	var branches []string
-	page := 1
-	for {
+	for page := 1; ; page++ {
 		url := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches?page=%d&per_page=100", owner, repo, page)
-		req, err := http.NewRequest("GET", url, nil)
+		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
 			return nil, err
 		}
 
 		if token := os.Getenv("GITHUB_TOKEN"); token != "" {
-			req.Header.Set("Authorization", "Bearer "+token)
+			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 		}
 
-		resp, err := httpClient.Do(req)
+		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			return nil, err
 		}
-		defer resp.Body.Close()
 
-		if resp.StatusCode != http.StatusOK {
-			body, _ := io.ReadAll(resp.Body)
-			return nil, fmt.Errorf("GitHub API returned %d: %s", resp.StatusCode, string(body))
-		}
-
-		var pageBranches []GitHubBranch
-		if err := json.NewDecoder(resp.Body).Decode(&pageBranches); err != nil {
+		pageBranches, err := decodeBranches(resp)
+		if err != nil {
 			return nil, err
 		}
 
@@ -251,8 +163,23 @@ func fetchBranches(owner, repo string) ([]string, error) {
 		for _, b := range pageBranches {
 			branches = append(branches, b.Name)
 		}
+	}
 
-		page++
+	return branches, nil
+}
+
+func decodeBranches(resp *http.Response) ([]githubBranch, error) {
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("github API returned status %d", resp.StatusCode)
+	}
+
+	var branches []githubBranch
+	if err := json.NewDecoder(resp.Body).Decode(&branches); err != nil {
+		return nil, err
 	}
 
 	return branches, nil
@@ -260,11 +187,13 @@ func fetchBranches(owner, repo string) ([]string, error) {
 
 func fetchStableVersion(branch string) (string, error) {
 	url := fmt.Sprintf("https://raw.githubusercontent.com/clojure/brew-install/%s/stable.properties", branch)
-	resp, err := httpClient.Get(url)
+	resp, err := http.Get(url)
 	if err != nil {
 		return "", fmt.Errorf("unable to download %s: %w", url, err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("unable to download %s: status %d", url, resp.StatusCode)
@@ -281,38 +210,4 @@ func fetchStableVersion(branch string) (string, error) {
 	}
 
 	return parts[0], nil
-}
-
-func computeChecksum(uri string) (string, error) {
-	resp, err := httpClient.Get(uri)
-	if err != nil {
-		return "", fmt.Errorf("unable to download %s: %w", uri, err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unable to download %s: status %d", uri, resp.StatusCode)
-	}
-
-	h := sha256.New()
-	if _, err := io.Copy(h, resp.Body); err != nil {
-		return "", fmt.Errorf("unable to read %s: %w", uri, err)
-	}
-	return hex.EncodeToString(h.Sum(nil)), nil
-}
-
-func matchesConstraints(v *semver.Version, constraints []cargo.ConfigMetadataDependencyConstraint) bool {
-	if len(constraints) == 0 {
-		return true
-	}
-	for _, c := range constraints {
-		cstr, err := semver.NewConstraint(c.Constraint)
-		if err != nil {
-			continue
-		}
-		if cstr.Check(v) {
-			return true
-		}
-	}
-	return false
 }

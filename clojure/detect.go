@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak/bard"
 )
@@ -32,7 +32,7 @@ const (
 	PlanEntrySyft                  = "syft"
 )
 
-type Detect struct{
+type Detect struct {
 	Logger bard.Logger
 }
 
