@@ -1,6 +1,6 @@
 module github.com/paketo-buildpacks/clojure-tools/v2
 
-go 1.27
+go 1.27.1
 
 require (
 	github.com/buildpacks/libcnb v1.30.4
