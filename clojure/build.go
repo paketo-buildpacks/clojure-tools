@@ -39,7 +39,7 @@ type Build struct {
 
 type ApplicationFactory interface {
 	NewApplication(additionalMetadata map[string]interface{}, arguments []string, artifactResolver libbs.ArtifactResolver,
-		cache libbs.Cache, command string, bom *libcnb.BOM, applicationPath string, sBOMScanner sbom.SBOMScanner) (libbs.Application, error)
+		cache libbs.Cache, command string, bom *libcnb.BOM, applicationPath string, sBOMScanner sbom.SBOMScanner) (libbs.Application, error) //nolint:staticcheck // hold off on the BOM migration for now
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
@@ -72,7 +72,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		d, be := NewDistribution(dep, dc)
 		d.Logger = b.Logger
 		result.Layers = append(result.Layers, d)
-		result.BOM.Entries = append(result.BOM.Entries, be)
+		result.BOM.Entries = append(result.BOM.Entries, be) //nolint:staticcheck // hold off on the BOM migration for now
 
 		command = filepath.Join(context.Layers.Path, d.Name(), "bin", "clojure")
 	} else if err != nil {
@@ -122,7 +122,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		art,
 		c,
 		command,
-		result.BOM,
+		result.BOM, //nolint:staticcheck // hold off on the BOM migration for now
 		context.Application.Path,
 		sbomScanner,
 	)
